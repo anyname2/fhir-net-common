@@ -19,14 +19,16 @@ namespace Hl7.FhirPath.Functions
 {
     internal static class EqualityOperators
     {
-        public static bool IsEqualTo(this IEnumerable<ITypedElement> left, IEnumerable<ITypedElement> right, bool compareNames = false)
+        public static bool? IsEqualTo(this IEnumerable<ITypedElement> left, IEnumerable<ITypedElement> right, bool compareNames = false)
         {
             var r = right.GetEnumerator();
 
             foreach (var l in left)
             {
-                if (!r.MoveNext()) return false;        // number of children not the same            
-                if (!l.IsEqualTo(r.Current, compareNames)) return false;
+                if (!r.MoveNext()) return false;        // number of children not the same
+                var comparisonResult = l.IsEqualTo(r.Current, compareNames);
+                if (comparisonResult == false) return false;
+                if (comparisonResult == null) return null;
             }
 
             if (r.MoveNext())
@@ -35,7 +37,7 @@ namespace Hl7.FhirPath.Functions
                 return true;
         }
 
-        public static bool IsEqualTo(this ITypedElement left, ITypedElement right, bool compareNames = false)
+        public static bool? IsEqualTo(this ITypedElement left, ITypedElement right, bool compareNames = false)
         {
             // TODO: Merge with ElementNodeComparator.IsEqualTo
 
@@ -70,10 +72,7 @@ namespace Hl7.FhirPath.Functions
                 return false;
             }
         }
-
-
-    
-
+ 
         public static bool IsEquivalentTo(this IEnumerable<ITypedElement> left, IEnumerable<ITypedElement> right, bool compareNames = false)
         {
             var r = right.ToList();
@@ -131,23 +130,11 @@ namespace Hl7.FhirPath.Functions
 
             bool namesAreEquivalent(ITypedElement le, ITypedElement ri)
             {
-                if (le.Name == "id" && ri.Name == "id") return true;      // don't compare 'id' elements for equivalence
+                if (le.Name == "id" && ri.Name == "id") return true;      // IN FHIR: don't compare 'id' elements for equivalence
                 if (le.Name != ri.Name) return false;
 
                 return true;
             }
-        }
-
-        public static bool IsEquivalentTo(this string a, string b)
-        {
-            if (b == null) return false;
-
-            a = a.Trim().ToLowerInvariant();
-            b = b.Trim().ToLowerInvariant();
-
-            return a == b;
-            //    return String.Compare(a, b, CultureInfo.InvariantCulture,
-            //CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) == 0;
         }
 
         internal class ValueProviderEqualityComparer : IEqualityComparer<ITypedElement>
@@ -157,7 +144,11 @@ namespace Hl7.FhirPath.Functions
                 if (x == null && y == null) return true;
                 if (x == null || y == null) return false;
 
-                return x.IsEqualTo(y);
+                // TODO: this is not completely correct behaviour
+                // The functions Union /Contains/Distinct etc that use
+                // this equality should probably also be changed to use
+                // 3-valued equality.
+                return x.IsEqualTo(y) == true;   
             }
 
             public int GetHashCode(ITypedElement element)

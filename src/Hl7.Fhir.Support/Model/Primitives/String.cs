@@ -21,5 +21,31 @@ namespace Hl7.Fhir.Model.Primitives
             value = representation;   // a bit obvious
             return true;
         }
+
+        // Comparison functions work according to the rules described for CQL, 
+        // see https://cql.hl7.org/09-b-cqlreference.html#comparison-operators-4
+        // for more details.
+
+        /// <summary>
+        /// Compares two booleans according to CQL equality rules.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="r"></param>
+        /// <returns>Return true if both arguments are exactly the same boolean value, false otherwise. Returns null if any of the
+        /// arguments are null.</returns>
+        public static bool? IsEqualTo(string l, string r) =>
+            (l == null || r == null)
+                ? null
+                : (bool?)(l == r);
+
+        /// <summary>
+        /// Compares two booleans according to CQL equivalence rules.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <param name="r"></param>
+        /// <returns>Return true if both arguments are exactly the same boolean value, false otherwise</returns>
+        public static bool IsEquivalentTo(string l, string r) =>
+            l == r;
+
     }
 }
