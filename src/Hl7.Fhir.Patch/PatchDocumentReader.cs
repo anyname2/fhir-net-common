@@ -37,7 +37,7 @@ namespace Hl7.Fhir.Serialization
 
         public static PatchDocument Read (ITypedElement fhirPatch, IStructureDefinitionSummaryProvider provider, Action<Exception> errorReporter = null)
         {
-            errorReporter ??= _defaultErrorReporter;
+            errorReporter = errorReporter ?? _defaultErrorReporter;
             var patchDocument = new PatchDocument(new List<Operation>(), provider);
 
             foreach ( var parameter in fhirPatch.Select("Parameters.parameter") )
@@ -59,16 +59,33 @@ namespace Hl7.Fhir.Serialization
                 foreach ( var part in parts )
                 {
                     var partName = part.Scalar("name") as string;
-                    var paramName = (partName?.ToUpperInvariant()) switch
+                    ParameterName? paramName;
+                    switch( partName?.ToUpperInvariant() )
                     {
-                        "TYPE" => ParameterName.Type,
-                        "PATH" => ParameterName.Path,
-                        "NAME" => ParameterName.Name,
-                        "VALUE" => ParameterName.Value,
-                        "INDEX" => ParameterName.Index,
-                        "SOURCE" => ParameterName.Source,
-                        "DESTINATION" => ParameterName.Destination,
-                        _ => (ParameterName?)null
+                        case "TYPE":
+                            paramName = ParameterName.Type;
+                            break;
+                        case "PATH":
+                            paramName = ParameterName.Path;
+                            break;
+                        case "NAME":
+                            paramName = ParameterName.Name;
+                            break;
+                        case "VALUE":
+                            paramName = ParameterName.Value;
+                            break;
+                        case "INDEX":
+                            paramName = ParameterName.Index;
+                            break;
+                        case "SOURCE":
+                            paramName = ParameterName.Source;
+                            break;
+                        case "DESTINATION":
+                            paramName = ParameterName.Destination;
+                            break;
+                        default:
+                            paramName = null;
+                            break;
                     };
 
                     if ( paramName == null )
@@ -88,14 +105,27 @@ namespace Hl7.Fhir.Serialization
                 }
 
                 var operationTypeStr = operationTypeComponent.Scalar("value") as string;
-                OperationType? operationType = (operationTypeStr?.ToUpperInvariant()) switch
+                OperationType? operationType;
+                switch ( operationTypeStr?.ToUpperInvariant() )
                 {
-                    "ADD" => OperationType.Add,
-                    "INSERT" => OperationType.Insert,
-                    "DELETE" => OperationType.Delete,
-                    "REPLACE" => OperationType.Replace,
-                    "MOVE" => OperationType.Move,
-                    _ => (OperationType?)null
+                    case "ADD":
+                        operationType = OperationType.Add;
+                        break;
+                    case "INSERT":
+                        operationType = OperationType.Insert;
+                        break;
+                    case "DELETE":
+                        operationType = OperationType.Delete;
+                        break;
+                    case "REPLACE":
+                        operationType = OperationType.Replace;
+                        break;
+                    case "MOVE":
+                        operationType = OperationType.Move;
+                        break;
+                    default:
+                        operationType = null;
+                        break;
                 };
 
                 if ( operationType == null )
