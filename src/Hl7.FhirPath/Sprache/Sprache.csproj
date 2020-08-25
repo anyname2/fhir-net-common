@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>2.1.1-beta1</VersionPrefix>
-    <TargetFrameworks>netstandard1.0;net40;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>Sprache</AssemblyName>
     <PackageId>Sprache</PackageId>
